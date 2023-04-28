@@ -4,11 +4,5 @@
       "name": "real-time-handwritten-chat",
       "path": "."
     }
-  ],
-  "settings": {
-    "files.associations": {
-      "types.h": "c",
-      "netdb.h": "c"
-    }
-  }
+  ]
 }
