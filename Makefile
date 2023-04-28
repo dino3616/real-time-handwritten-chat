@@ -31,11 +31,10 @@ start:
 prepare:
 	@[ -d $(BIN_DIR) ] || mkdir -p $(BIN_DIR)
 	@[ -d $(OUT_DIR) ] || mkdir -p $(OUT_DIR)
-	@make clean
 
 .PHONY: clean
 clean:
-	-rm -f $(OBJS) $(DEPENDS) $(TARGET) $(BIN_DIR)/$(PROGRAM)
+	$(RM) -rf $(BIN_DIR) $(OUT_DIR)
 
 $(TARGET): $(OBJS)
 	$(COMPILER) -o $@ $^ $(LD_FLAGS)
