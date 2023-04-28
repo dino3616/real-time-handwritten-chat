@@ -47,7 +47,7 @@ void parseCommand(char *);
 unsigned long parseColor(char *);
 void startPainter();
 
-int main(int argc, char *argv[]) {
+int main() {
   timeVal.tv_sec = 0;
   timeVal.tv_usec = 1;
   startPainter();
@@ -126,7 +126,7 @@ void parseCommand(char *input) {
 }
 
 unsigned long parseColor(char *colorHex) {
-  int r = 0, g = 0, b = 0;
+  unsigned int r = 0, g = 0, b = 0;
   unsigned long colorVal;
   char colorBuf[16];
   if (sscanf(colorHex, "%lx", &colorVal) == 1) {
