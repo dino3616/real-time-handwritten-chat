@@ -10,6 +10,8 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "lib/error.h"
+
 #define NAME_SIZE 40
 #define BUF_SIZE 1024
 #define BUF_SIZE_LONG 2048
@@ -17,12 +19,6 @@
 #define PORT_NO (u_short)20000
 #define GRID_X 5
 #define GRID_Y 4
-#define ErrorExit(x)      \
-  {                       \
-    fprintf(stderr, "-"); \
-    perror(x);            \
-    exit(0);              \
-  }
 
 struct Stroke {
   XPoint p0;
@@ -163,8 +159,7 @@ void startPainter() {
     FD_SET(0, &mask);
     hasNext = true;
     result = select(0 + 1, &mask, NULL, NULL, &timeVal);
-    if (result < 0) ErrorExit("select");
-
+    if (result < 0) exit_as_error("select");
     // Message input via stdio (fd=0 means standard input)
     // Q: Quit from the running program
     if (FD_ISSET(0, &mask)) {
