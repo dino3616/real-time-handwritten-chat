@@ -1,13 +1,13 @@
 {
   "configurations": [
     {
-      "name": "Linux",
-      "includePath": ["${workspaceFolder}/**", "/usr/include/**"],
-      "defines": [],
       "compilerPath": "/usr/bin/gcc",
-      "cStandard": "c17",
+      "configurationProvider": "ms-vscode.makefile-tools",
       "cppStandard": "gnu++17",
-      "intelliSenseMode": "linux-gcc-arm64"
+      "cStandard": "c17",
+      "defines": [],
+      "includePath": ["/usr/include/**"],
+      "name": "Linux"
     }
   ],
   "version": 4
