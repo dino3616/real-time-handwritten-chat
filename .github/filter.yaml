@@ -1,0 +1,18 @@
+app:
+  - .devcontainer/**/*
+  - .github/filter.yaml
+  - .github/workflows/app-*.yaml
+  - .vscode/**/*
+  - docker/**/*
+  - src/**/*
+  - .dockerignore
+  - .editorconfig
+  - .gitignore
+  - Makefile
+  - real-time-handwritten-chat.code-workspace
+
+docker:
+  - .github/filter.yaml
+  - .github/workflows/docker-*.yaml
+  - docker/**/*
+  - .dockerignore
