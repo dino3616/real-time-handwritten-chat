@@ -13,7 +13,7 @@ OBJS := $(addprefix $(OUT_DIR)/, $(subst ./, , $(patsubst %.c, %.o, $(SRCES))))
 DEPENDS := $(OBJS:.o=.d)
 
 COMPILER := gcc
-C_FLAGS := -Wall -MMD -MP -O2
+C_FLAGS := -Wall -Wextra -Werror -pedantic-errors -MMD -MP -O2
 LD_FLAGS := -lX11
 INCLUDE_FLAGS := -I$(INCLUDE_DIR)
 
