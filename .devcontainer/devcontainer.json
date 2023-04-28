@@ -6,15 +6,17 @@
   "customizations": {
     "vscode": {
       "extensions": [
-        "wmaurer.change-case",
         "ms-vscode.cpptools",
+        "wmaurer.change-case",
         "adam-bender.commit-message-editor",
         "mikestead.dotenv",
         "editorconfig.editorconfig",
         "usernamehw.errorlens",
         "github.copilot",
+        "github.copilot-labs",
         "eamodio.gitlens",
         "visualstudioexptteam.vscodeintellic",
+        "ms-vscode.makefile-tools",
         "pkief.material-icon-theme",
         "christian-kohler.path-intellisense",
         "esbenp.prettier-vscode",
