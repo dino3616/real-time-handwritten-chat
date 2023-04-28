@@ -32,9 +32,9 @@ make dev
 If there are no errors, you can open and view the program by [`Dev Containers desktop-light features`](https://github.com/microsoft/vscode-dev-containers/blob/main/script-library/docs/desktop-lite.md).
 Let's go step by step.
 
-First step, you need to access to `http://localhost:6080` in your browser. This port is specified in `.devcontainer/devcontainer.json > features > ghcr.io/devcontainers/features/desktop-lite > webPort`.  
-Then, you need to enter the password `vscode` to login. This password is also specified in `.devcontainer/devcontainer.json > features > ghcr.io/devcontainers/features/desktop-lite > password`.  
-After that, you can see your program that is running in your browser! 🥳
+1. First step, you need to access to `http://localhost:6080` in your browser. This port is specified in `.devcontainer/devcontainer.json > features > ghcr.io/devcontainers/features/desktop-lite > webPort`.
+2. Then, you need to enter the password `vscode` to login. This password is also specified in `.devcontainer/devcontainer.json > features > ghcr.io/devcontainers/features/desktop-lite > password`.
+3. After that, you can see your program that is running in your browser! 🥳
 
 ## Scripts
 
