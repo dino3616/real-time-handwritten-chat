@@ -17,21 +17,27 @@ C_FLAGS := -Wall -O2
 LD_FLAGS := -lX11
 INCLUDE_FLAGS := -I$(INCLUDE_DIR)
 
+.PHONY: build
 build: prepare depend $(TARGET) publish
 
+.PHONY: dev
 dev: build start
 
+.PHONY: start
 start:
 	$(BIN_DIR)/$(PROGRAM)
 
+.PHONY: prepare
 prepare:
 	@[ -d $(BIN_DIR) ] || mkdir -p $(BIN_DIR)
 	@[ -d $(OUT_DIR) ] || mkdir -p $(OUT_DIR)
 	@make clean
 
+.PHONY: clean
 clean:
 	-rm -f $(OBJS) $(DEPENDS) $(TARGET) $(BIN_DIR)/$(PROGRAM)
 
+.PHONY: depend
 depend: $(OBJS)
 	$(RM) $(OUT_DIR)/depend.inc
 	-@ for i in $^; do cpp -MM $$i | sed "s/\.*\.c//g" >> $(OUT_DIR)/depend.inc; done
@@ -43,6 +49,7 @@ $(OUT_DIR)/%.o:%.c
 	@if [ ! -e `dirname $@` ]; then mkdir -p `dirname $@`; fi
 	$(COMPILER) $(C_FLAGS) $(INCLUDE_FLAGS) -o $@ -c $<
 
+.PHONY: publish
 publish:
 	-cp $(TARGET) $(BIN_DIR)/$(PROGRAM)
 
