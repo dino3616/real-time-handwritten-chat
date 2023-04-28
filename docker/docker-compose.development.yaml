@@ -1,0 +1,13 @@
+version: "3.8"
+
+services:
+  app:
+    container_name: app
+    build:
+      context: ../
+      dockerfile: ./docker/Dockerfile.development
+    volumes:
+      - type: bind
+        source: ../
+        target: /workspaces/real-time-handwritten-chat/
+    tty: true

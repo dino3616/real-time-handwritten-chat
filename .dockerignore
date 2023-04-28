@@ -1,0 +1,27 @@
+# debug
+**/*.log
+
+# deliverable
+**/.next/
+**/build/
+**/dist/
+**/out/
+**/*.exe
+**/*.out
+
+# dependency
+**/node_modules/
+**/.pnpm-store/
+
+# env file
+**/.env*
+!**/.env.template
+
+# storybook
+**/.storybook/static/
+
+# testing
+**/coverage
+
+# typescript
+**/*.tsbuildinfo
