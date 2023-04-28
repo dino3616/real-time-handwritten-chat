@@ -1,21 +1,21 @@
-PROGRAM := $(shell basename `readlink -f .`)
+PROGRAM = $(shell basename `readlink -f .`)
 
-BIN_DIR := ./bin
-OUT_DIR := ./build
-SRC_DIR := ./src
-INCLUDE_DIR := $(SRC_DIR)
+BIN_DIR = ./bin
+OUT_DIR = ./build
+SRC_DIR = ./src
+INCLUDE_DIR = $(SRC_DIR)
 
-IGNORE_PATTERN := /_
+IGNORE_PATTERN = /_
 
-TARGET := $(OUT_DIR)/$(PROGRAM)
+TARGET = $(OUT_DIR)/$(PROGRAM)
 SRCES = $(shell find * -name *.c | grep -v $(IGNORE_PATTERN))
-OBJS := $(addprefix $(OUT_DIR)/, $(subst ./, , $(patsubst %.c, %.o, $(SRCES))))
-DEPENDS := $(OBJS:.o=.d)
+OBJS = $(addprefix $(OUT_DIR)/, $(subst ./, , $(patsubst %.c, %.o, $(SRCES))))
+DEPENDS = $(OBJS:.o=.d)
 
-COMPILER := gcc
-C_FLAGS := -Wall -Wextra -Werror -pedantic-errors -MMD -MP -O2
-LD_FLAGS := -lX11
-INCLUDE_FLAGS := -I$(INCLUDE_DIR)
+COMPILER = gcc
+C_FLAGS = -Wall -Wextra -Werror -pedantic-errors -MMD -MP -O2
+LD_FLAGS = -lX11
+INCLUDE_FLAGS = -I$(INCLUDE_DIR)
 
 .PHONY: build
 build: prepare $(TARGET) publish
