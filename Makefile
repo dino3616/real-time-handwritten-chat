@@ -18,7 +18,12 @@ LD_FLAGS = -lX11
 INCLUDE_FLAGS = -I$(INCLUDE_DIR)
 
 .PHONY: build
-build: prepare $(TARGET) publish
+build: prepare $(TARGET)
+	@if [ ! -e $(BIN_DIR)/$(PROGRAM) -o $(TARGET) -nt $(BIN_DIR)/$(PROGRAM) ]; then \
+		cp $(TARGET) $(BIN_DIR)/$(PROGRAM); \
+	else \
+		echo "No need to copy '$(TARGET)' to '$(BIN_DIR)/$(PROGRAM)'."; \
+	fi
 
 .PHONY: dev
 dev: build start
@@ -34,7 +39,11 @@ prepare:
 
 .PHONY: clean
 clean:
-	$(RM) -rf $(BIN_DIR) $(OUT_DIR)
+	@if [ -d $(BIN_DIR) ] || [ -d $(OUT_DIR) ]; then \
+		rm -rf $(BIN_DIR) $(OUT_DIR); \
+	else \
+		echo "No need to clean."; \
+	fi
 
 $(TARGET): $(OBJS)
 	$(COMPILER) -o $@ $^ $(LD_FLAGS)
@@ -42,9 +51,5 @@ $(TARGET): $(OBJS)
 $(OUT_DIR)/%.o:%.c
 	@if [ ! -e `dirname $@` ]; then mkdir -p `dirname $@`; fi
 	$(COMPILER) $(C_FLAGS) $(INCLUDE_FLAGS) -o $@ -c $<
-
-.PHONY: publish
-publish:
-	-cp $(TARGET) $(BIN_DIR)/$(PROGRAM)
 
 -include $(DEPENDS)
