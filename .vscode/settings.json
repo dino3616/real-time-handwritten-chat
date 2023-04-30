@@ -141,6 +141,7 @@
     }
   ],
   "commit-message-editor.view.defaultView": "form",
+  "C_Cpp.vcFormat.space.pointerReferenceAlignment": "right",
   "editor.codeActionsOnSave": {
     "source.fixAll": true
   },
