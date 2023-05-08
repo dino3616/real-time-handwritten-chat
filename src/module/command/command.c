@@ -40,7 +40,7 @@ int parse_command(char *input, WindowManager_t *window_manager) {
 
       break;
     default:
-      print_error("Invalid command input. Expected: [c | q], got '%c'.",
+      print_error("Invalid command input. Expected: [c | q |h], got '%c'.",
                   command);
 
       break;

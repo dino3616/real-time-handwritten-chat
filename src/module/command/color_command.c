@@ -1,5 +1,6 @@
 #include "module/command/color_command.h"
 
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -15,7 +16,9 @@ int color_command(WindowManager_t *window_manager) {
   printf("[color cmd] > ");
   fflush(stdout);
   if (fgets(color_hex, sizeof(color_hex), stdin) == NULL) {
-    print_error("Failed to read color input.");
+    int error_number = errno;
+    print_error("Failed to read color input. cause: '%s'\n",
+                strerror(error_number));
 
     return EXIT_FAILURE;
   }

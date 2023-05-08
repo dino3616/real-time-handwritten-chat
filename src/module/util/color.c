@@ -1,5 +1,6 @@
 #include "module/util/color.h"
 
+#include <errno.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -8,8 +9,11 @@
 RGBColor_t *parse_color(char *color_hex, RGBColor_t *rgb_color,
                         unsigned long *pixel) {
   if (sscanf(color_hex, "%lx", pixel) != 1) {
-    print_error("Failed to parse color. Expected hex format, got '%s'.",
-                color_hex);
+    int error_number = errno;
+    print_error(
+        "Failed to parse color. Expected hex format, got '%s'. "
+        "cause: ",
+        color_hex, strerror(error_number));
 
     return NULL;
   }
