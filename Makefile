@@ -30,7 +30,7 @@ dev: build start
 
 .PHONY: start
 start:
-	$(BIN_DIR)/$(PROGRAM)
+	$(BIN_DIR)/$(PROGRAM) $(ARGS)
 
 .PHONY: prepare
 prepare:
