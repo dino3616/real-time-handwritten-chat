@@ -1,5 +1,3 @@
-#define _DEFAULT_SOURCE
-
 #include "module/socket/socket.h"
 
 #include <errno.h>

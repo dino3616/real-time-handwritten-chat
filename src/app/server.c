@@ -1,5 +1,3 @@
-#define _DEFAULT_SOURCE
-
 #include "app/server.h"
 
 #include <errno.h>
