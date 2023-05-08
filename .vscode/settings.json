@@ -114,7 +114,7 @@
       "name": "scope",
       "type": "text",
       "description": "Scope of changes.",
-      "prefix": " (",
+      "prefix": "(",
       "suffix": ")"
     },
     {
@@ -141,6 +141,13 @@
     }
   ],
   "commit-message-editor.view.defaultView": "form",
+  "commit-message-editor.dynamicTemplate": [
+    "{type} {scope} {description}",
+    "",
+    "{body}",
+    "",
+    "{footer}"
+  ],
   "C_Cpp.vcFormat.space.pointerReferenceAlignment": "right",
   "editor.codeActionsOnSave": {
     "source.fixAll": true
