@@ -1,70 +1,47 @@
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <strings.h>
-#include <sys/select.h>
-#include <unistd.h>
+#include <string.h>
 
-#include "module/command/command.h"
-#include "module/command/help_command.h"
+#include "app/app.h"
 #include "module/error/error.h"
-#include "module/window/event/event.h"
-#include "module/window/window.h"
 
-int main() {
-  WindowManager_t window_manager = create_window(
-      500, 200, 600, 400, "real-time-handwritten-chat", open_display());
+int main(int argc, char *argv[]) {
+  if (argc == 2) {
+    if (strcmp(argv[1], "--client") == 0 || strcmp(argv[1], "--c") == 0) {
+      printf("The program has started in the client role! 🚀\n");
 
-  struct timeval timeout;
-  timeout.tv_sec = 0;
-  timeout.tv_usec = 1;
-
-  if (help_command() != EXIT_SUCCESS) {
-    print_error("Failed to execute help command.");
-
-    return EXIT_FAILURE;
-  }
-
-  printf("> ");
-  fflush(stdout);
-
-  while (true) {
-    event_handler(&window_manager);
-
-    fd_set mask;
-    FD_ZERO(&mask);
-    FD_SET(STDIN_FILENO, &mask);
-
-    int result = select(STDIN_FILENO + 1, &mask, NULL, NULL, &timeout);
-    if (result < 0) {
-      print_error("Failed to execute select().");
-
-      return EXIT_FAILURE;
-    }
-
-    if (FD_ISSET(STDIN_FILENO, &mask)) {
-      char input_buf[COMMAND_INPUT_BUF_SIZE];
-      bzero(input_buf, sizeof(char) * COMMAND_INPUT_BUF_SIZE);
-
-      int input_length =
-          read(STDIN_FILENO, input_buf, sizeof(char) * COMMAND_INPUT_BUF_SIZE);
-      if (input_length < 0) {
-        print_error("Failed to execute read().");
+      if (launch_client() != EXIT_SUCCESS) {
+        print_error("An error occured while running the client.");
 
         return EXIT_FAILURE;
       }
+    } else if (strcmp(argv[1], "--server") == 0 ||
+               strcmp(argv[1], "--s") == 0) {
+      printf("The program has started in the server role! 🛰️\n");
 
-      if (parse_command(input_buf, &window_manager) != EXIT_SUCCESS) {
-        print_error("Oops! Something went wrong while processing command :(");
+      if (launch_server() != EXIT_SUCCESS) {
+        print_error("An error occured while running the server.");
+
+        return EXIT_FAILURE;
       }
+    } else {
+      printf("Invalid argument detected! 🛸\nRecieved: %s\n", argv[1]);
 
-      printf("\n> ");
-      fflush(stdout);
+      return EXIT_FAILURE;
+    }
+  } else if (argc > 2) {
+    printf("Too many arguments detected! 🛸\n");
+
+    return EXIT_FAILURE;
+  } else {
+    printf("The program has started in the default (server) role! 🛰️\n");
+
+    if (launch_server() != EXIT_SUCCESS) {
+      print_error("An error occured while running the server.");
+
+      return EXIT_FAILURE;
     }
   }
-
-  destroy_window(&window_manager);
-  close_display(window_manager.display);
 
   return EXIT_SUCCESS;
 }
