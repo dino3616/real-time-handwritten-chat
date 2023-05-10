@@ -1,5 +1,5 @@
-#ifndef MODULE_SOCKET_SOCKET_H
-#define MODULE_SOCKET_SOCKET_H
+#ifndef MODULE_INFRA_SOCKET_SOCKET_H
+#define MODULE_INFRA_SOCKET_SOCKET_H
 
 extern int *connect_with_socket(char *host_name, int port, int *socket_fd);
 

@@ -1,4 +1,4 @@
-#include "module/socket/socket.h"
+#include "module/infra/socket/socket.h"
 
 #include <errno.h>
 #include <netdb.h>
@@ -10,7 +10,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "module/error/error.h"
+#include "core/log/log.h"
 
 int *create_socket(int port, char *host_name, int *socket_fd,
                    struct sockaddr_in *socket_addr);
@@ -18,7 +18,7 @@ int *create_socket(int port, char *host_name, int *socket_fd,
 int *connect_with_socket(char *host_name, int port, int *socket_fd) {
   struct sockaddr_in socket_addr;
   if (create_socket(port, host_name, socket_fd, &socket_addr) == NULL) {
-    print_error("Failed to create socket.");
+    log_error("Failed to create socket.");
 
     return NULL;
   }
@@ -26,8 +26,8 @@ int *connect_with_socket(char *host_name, int port, int *socket_fd) {
   if (connect(*socket_fd, (struct sockaddr *)&socket_addr,
               sizeof(socket_addr)) != EXIT_SUCCESS) {
     int error_number = errno;
-    print_error("Failed to connect to server. cause: '%s'\n",
-                strerror(error_number));
+    log_error("Failed to connect to server. cause: '%s'",
+              strerror(error_number));
 
     return NULL;
   }
@@ -38,7 +38,7 @@ int *connect_with_socket(char *host_name, int port, int *socket_fd) {
 int *listen_with_socket(char *host_name, int port, int *socket_fd) {
   struct sockaddr_in socket_addr;
   if (create_socket(port, host_name, socket_fd, &socket_addr) == NULL) {
-    print_error("Failed to create socket.");
+    log_error("Failed to create socket.");
 
     return NULL;
   }
@@ -46,7 +46,7 @@ int *listen_with_socket(char *host_name, int port, int *socket_fd) {
   if (bind(*socket_fd, (struct sockaddr *)&socket_addr, sizeof(socket_addr)) !=
       EXIT_SUCCESS) {
     int error_number = errno;
-    print_error("Failed to bind socket. cause: '%s'\n", strerror(error_number));
+    log_error("Failed to bind socket. cause: '%s'", strerror(error_number));
 
     return NULL;
   }
@@ -61,8 +61,8 @@ int *create_socket(int port, char *host_name, int *socket_fd,
   struct hostent *host = gethostbyname(host_name);
   if (host == NULL) {
     int error_number = errno;
-    print_error("Failed to get host by name. cause: '%s'\n",
-                strerror(error_number));
+    log_error("Failed to get host by name. cause: '%s'",
+              strerror(error_number));
 
     return NULL;
   }
@@ -76,8 +76,7 @@ int *create_socket(int port, char *host_name, int *socket_fd,
   *socket_fd = socket(AF_INET, SOCK_STREAM, 0);
   if (*socket_fd < 0) {
     int error_number = errno;
-    print_error("Failed to create socket. cause: '%s'\n",
-                strerror(error_number));
+    log_error("Failed to create socket. cause: '%s'", strerror(error_number));
 
     return NULL;
   }
