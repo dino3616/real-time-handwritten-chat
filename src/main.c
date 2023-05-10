@@ -9,7 +9,7 @@
 int main(int argc, char *argv[]) {
   if (argc == 2) {
     if (strcmp(argv[1], "--client") == 0 || strcmp(argv[1], "--c") == 0) {
-      printf("The program has started in the client role! 🚀\n");
+      log_info("The program has started in the client role! 🚀");
 
       if (launch_client() != EXIT_SUCCESS) {
         log_error("An error occured while running the client.");
@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
       }
     } else if (strcmp(argv[1], "--server") == 0 ||
                strcmp(argv[1], "--s") == 0) {
-      printf("The program has started in the server role! 🛰️\n");
+      log_info("The program has started in the server role! 🛰️");
 
       if (launch_server() != EXIT_SUCCESS) {
         log_error("An error occured while running the server.");
@@ -26,16 +26,16 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
       }
     } else {
-      printf("Invalid argument detected! 🛸\nRecieved: %s\n", argv[1]);
+      log_error("Invalid argument detected! 🛸\nRecieved: %s", argv[1]);
 
       return EXIT_FAILURE;
     }
   } else if (argc > 2) {
-    printf("Too many arguments detected! 🛸\n");
+    log_error("Too many arguments detected! 🛸");
 
     return EXIT_FAILURE;
   } else {
-    printf("The program has started in the default (server) role! 🛰️\n");
+    log_info("The program has started in the default (server) role! 🛰️");
 
     if (launch_server() != EXIT_SUCCESS) {
       log_error("An error occured while running the server.");

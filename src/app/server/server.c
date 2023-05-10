@@ -25,7 +25,7 @@ int launch_server() {
 
     return EXIT_FAILURE;
   }
-  printf("Your host name is '%s'\n", host_name);
+  log_info("Your host name is '%s'", host_name);
   if (setenv("HOST_NAME", host_name, 1) != EXIT_SUCCESS) {
     int error_number = errno;
     log_error("Failed to set host name in environment variable. cause: '%s'",
@@ -109,7 +109,7 @@ int launch_server() {
           client_fds[i] = new_client_fd;
           client_count++;
 
-          printf("client[%d] created.\n", i);
+          log_info("client[%d] created.", i);
 
           break;
         }
@@ -139,7 +139,7 @@ int launch_server() {
             client_fds[i] = 0;
             client_count--;
 
-            printf("client[%d] destroyed.\n", i);
+            log_info("client[%d] destroyed.", i);
 
             continue;
           }
