@@ -41,9 +41,16 @@ int launch_server() {
     return EXIT_FAILURE;
   }
 
+  int *client_fds = (int *)calloc(CLIENT_FDS_ALLOCATION_CHUNK, sizeof(int));
+  if (client_fds == NULL) {
+    int error_number = errno;
+    log_error("Failed to allocate memory for client fds. cause: '%s'",
+              strerror(error_number));
+
+    return EXIT_FAILURE;
+  }
+  int client_fds_length = CLIENT_FDS_ALLOCATION_CHUNK;
   int client_count = 0;
-  int client_fds[CLIENT_MAX];
-  bzero(client_fds, sizeof(int) * CLIENT_MAX);
 
   struct timeval timeout = {.tv_sec = 0, .tv_usec = 1};
 
@@ -57,7 +64,7 @@ int launch_server() {
     FD_SET(0, &mask);
 
     int fd_max = socket_fd;
-    for (int i = 0; i < CLIENT_MAX; i++) {
+    for (int i = 0; i < client_fds_length; i++) {
       if (client_fds[i] > 0) {
         FD_SET(client_fds[i], &mask);
       }
@@ -104,19 +111,36 @@ int launch_server() {
         return EXIT_FAILURE;
       }
 
-      for (int i = 0; i < CLIENT_MAX; i++) {
+      for (int i = 0; i < client_fds_length; i++) {
         if (client_fds[i] == 0) {
           client_fds[i] = new_client_fd;
           client_count++;
 
           log_info("client[%d] created.", i);
 
+          if (client_count == client_fds_length) {
+            int *new_client_fds = (int *)realloc(
+                client_fds, (client_fds_length + CLIENT_FDS_ALLOCATION_CHUNK) *
+                                sizeof(int));
+            if (new_client_fds == NULL) {
+              int error_number = errno;
+              log_error(
+                  "Failed to reallocate memory for client fds. cause: '%s'",
+                  strerror(error_number));
+
+              return EXIT_FAILURE;
+            }
+
+            client_fds = new_client_fds;
+            client_fds_length += CLIENT_FDS_ALLOCATION_CHUNK;
+          }
+
           break;
         }
       }
     }
 
-    for (int i = 0; i < CLIENT_MAX; i++) {
+    for (int i = 0; i < client_fds_length; i++) {
       if (client_fds[i] == 0) {
         continue;
       }
@@ -172,7 +196,7 @@ int launch_server() {
               }
             }
 
-            for (int j = 0; j < CLIENT_MAX; j++) {
+            for (int j = 0; j < client_fds_length; j++) {
               if (j == i || client_fds[j] == 0) {
                 continue;
               }
@@ -202,14 +226,14 @@ int launch_server() {
     }
   }
 
-  for (int i = 0; i < CLIENT_MAX; i++) {
-    int client_fd = client_fds[i];
-    if (client_fd > 0) {
-      close(client_fd);
+  for (int i = 0; i < client_fds_length; i++) {
+    if (client_fds[i] > 0) {
+      close(client_fds[i]);
     }
   }
-
   close(socket_fd);
+
+  free(client_fds);
 
   return EXIT_SUCCESS;
 }
