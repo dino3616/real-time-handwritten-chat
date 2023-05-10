@@ -13,6 +13,7 @@
 #include <unistd.h>
 
 #include "app/app.h"
+#include "module/context/context.h"
 #include "module/error/error.h"
 #include "module/socket/socket.h"
 
@@ -46,11 +47,12 @@ int launch_server() {
   int client_fds[CLIENT_MAX];
   bzero(client_fds, sizeof(int) * CLIENT_MAX);
 
-  bool has_next;
-
   struct timeval timeout;
   timeout.tv_sec = 0;
   timeout.tv_usec = 1;
+
+  PointHistory_t all_point_histories[256];
+  bzero(all_point_histories, sizeof(PointHistory_t) * 256);
 
   while (true) {
     fd_set mask;
@@ -58,16 +60,13 @@ int launch_server() {
     FD_SET(socket_fd, &mask);
     FD_SET(0, &mask);
 
-    has_next = true;
     int fd_max = socket_fd;
     for (int i = 0; i < CLIENT_MAX; i++) {
-      int client_fd = client_fds[i];
-
-      if (client_fd > 0) {
-        FD_SET(client_fd, &mask);
+      if (client_fds[i] > 0) {
+        FD_SET(client_fds[i], &mask);
       }
-      if (client_fd > fd_max) {
-        fd_max = client_fd;
+      if (client_fds[i] > fd_max) {
+        fd_max = client_fds[i];
       }
     }
 
@@ -78,6 +77,25 @@ int launch_server() {
                   strerror(error_number));
 
       return EXIT_FAILURE;
+    }
+
+    if (FD_ISSET(STDIN_FILENO, &mask)) {
+      char command;
+      if (read(STDIN_FILENO, &command, sizeof(char)) < 0) {
+        int error_number = errno;
+        print_error("Failed to read from stdin. cause: '%s'\n",
+                    strerror(error_number));
+
+        return EXIT_FAILURE;
+      }
+      while (getchar() != '\n') {
+      }
+
+      if (command == 'q') {
+        printf("Bye-bye :)\n");
+
+        break;
+      }
     }
 
     if (FD_ISSET(socket_fd, &mask)) {
@@ -95,7 +113,7 @@ int launch_server() {
           client_fds[i] = new_client_fd;
           client_count++;
 
-          printf("Client[%02d] created.\n", i);
+          printf("client[%d] created.\n", i);
 
           break;
         }
@@ -103,39 +121,89 @@ int launch_server() {
     }
 
     for (int i = 0; i < CLIENT_MAX; i++) {
-      int fd = client_fds[i];
-      if (fd == 0) {
+      if (client_fds[i] == 0) {
         continue;
       }
 
-      if (FD_ISSET(fd, &mask)) {
-        char recieved_buf[RECV_BUF_SIZE];
-        bzero(recieved_buf, sizeof(char) * RECV_BUF_SIZE);
-        int recieved_buf_length = read(fd, recieved_buf, RECV_BUF_SIZE);
-        if (strcmp(recieved_buf, "q") == 0 || recieved_buf_length == 0) {
-          close(fd);
-          client_fds[i] = 0;
-          client_count--;
+      if (FD_ISSET(client_fds[i], &mask)) {
+        SocketContext_t socket_context;
+        if (recv(client_fds[i], &socket_context, sizeof(SocketContext_t), 0) <
+            0) {
+          int error_number = errno;
+          print_error(
+              "Failed to receive socket context from client[%d]. cause: '%s'\n",
+              i, strerror(error_number));
 
-          printf("Client[%02d] destroyed.\n", i);
-
-          continue;
+          return EXIT_FAILURE;
         }
 
-        //   bzero(strBuf, sizeof(char) * BUF_SIZE_LONG);
-        //   sprintf(strBuf, "client[%02d]: %s", i, buf);
-        //   // Print the received message (fd=1 means standard output)
-        //   write(1, strBuf, strlen(strBuf));
-        //   // And also send that message to all other clients,
-        //   // except for the client who sent the message just now
-        //   for (int j = 0; j < CLIENT_MAX; j++) {
-        //     int tmp = client_fds[j];
-        //     if (j == i || tmp == 0) continue;
-        //     write(tmp, strBuf, strlen(strBuf));
-        //   }
+        switch (socket_context.command) {
+          case 'q': {
+            close(client_fds[i]);
+            client_fds[i] = 0;
+            client_count--;
+
+            printf("client[%d] destroyed.\n", i);
+
+            continue;
+          }
+        }
+
+        switch (socket_context.event_context.event_type) {
+          case PAINTED_EVENT: {
+            for (int j = 0; j < 256; j++) {
+              if (all_point_histories[j].start_point.x == 0 &&
+                  all_point_histories[j].start_point.y == 0 &&
+                  all_point_histories[j].end_point.x == 0 &&
+                  all_point_histories[j].end_point.y == 0) {
+                for (int k = 0; k < 256; j++, k++) {
+                  if (socket_context.event_context.additional_point_histories[k]
+                              .start_point.x == 0 &&
+                      socket_context.event_context.additional_point_histories[k]
+                              .start_point.y == 0 &&
+                      socket_context.event_context.additional_point_histories[k]
+                              .end_point.x == 0 &&
+                      socket_context.event_context.additional_point_histories[k]
+                              .end_point.y == 0) {
+                    break;
+                  }
+
+                  all_point_histories[j] = socket_context.event_context
+                                               .additional_point_histories[k];
+                }
+
+                break;
+              }
+            }
+
+            for (int j = 0; j < CLIENT_MAX; j++) {
+              if (j == i || client_fds[j] == 0) {
+                continue;
+              }
+
+              if (send(client_fds[j], &socket_context, sizeof(SocketContext_t),
+                       0) < 0) {
+                int error_number = errno;
+                print_error("Failed to send socket context. cause: '%s'\n",
+                            strerror(error_number));
+
+                return EXIT_FAILURE;
+              }
+            }
+
+            break;
+          }
+          case EXPOSE_EVENT: {
+            memcpy(socket_context.event_context.all_point_histories,
+                   all_point_histories, sizeof(PointHistory_t) * 256);
+
+            send(client_fds[i], &socket_context, sizeof(SocketContext_t), 0);
+
+            break;
+          }
+        }
       }
     }
-    if (!has_next) break;
   }
 
   for (int i = 0; i < CLIENT_MAX; i++) {
