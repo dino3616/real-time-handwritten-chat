@@ -1,18 +1,17 @@
-#include "module/util/color.h"
+#include "core/util/color.h"
 
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
 
-#include "module/error/error.h"
+#include "core/log/log.h"
 
 RGBColor_t *parse_color(char *color_hex, RGBColor_t *rgb_color,
                         unsigned long *pixel) {
   if (sscanf(color_hex, "%lx", pixel) != 1) {
     int error_number = errno;
-    print_error(
-        "Failed to parse color. Expected hex format, got '%s'. "
-        "cause: ",
+    log_error(
+        "Failed to parse color. Expected hex format, got '%s'. cause: '%s'",
         color_hex, strerror(error_number));
 
     return NULL;
@@ -28,7 +27,7 @@ RGBColor_t *parse_color(char *color_hex, RGBColor_t *rgb_color,
     sscanf(color_hex, "%02x%02x%02x", &rgb_color->r, &rgb_color->g,
            &rgb_color->b);
   } else {
-    print_error(
+    log_error(
         "Invalid color code format. Expected 3 or 6 characters, got '%s'.",
         color_hex);
 
