@@ -106,6 +106,9 @@ int launch_client() {
           EXIT_SUCCESS) {
         log_error("Something went wrong while processing command.");
       }
+
+      printf("> ");
+      fflush(stdout);
     }
 
     if (FD_ISSET(socket_fd, &mask)) {
