@@ -15,6 +15,7 @@
 #include "app/app.h"
 #include "module/command/command.h"
 #include "module/command/help_command.h"
+#include "module/context/context.h"
 #include "module/error/error.h"
 #include "module/socket/socket.h"
 #include "module/window/event/event.h"
@@ -70,14 +71,17 @@ int launch_client() {
   timeout.tv_usec = 1;
 
   while (true) {
-    event_handler(&window_manager);
-
     fd_set mask;
     FD_ZERO(&mask);
     FD_SET(STDIN_FILENO, &mask);
     FD_SET(socket_fd, &mask);
 
-    int result = select(STDIN_FILENO + 1, &mask, NULL, NULL, &timeout);
+    SocketContext_t socket_context;
+    bzero(&socket_context, sizeof(SocketContext_t));
+
+    render_event_handler(&window_manager, socket_fd, &socket_context);
+
+    int result = select(socket_fd + 1, &mask, NULL, NULL, &timeout);
     if (result < 0) {
       int error_number = errno;
       print_error("Failed to observe file descriptors. cause: '%s'\n",
@@ -87,37 +91,40 @@ int launch_client() {
     }
 
     if (FD_ISSET(STDIN_FILENO, &mask)) {
-      char input_buf[COMMAND_INPUT_BUF_SIZE];
-      bzero(input_buf, sizeof(char) * COMMAND_INPUT_BUF_SIZE);
-
-      int input_length =
-          read(STDIN_FILENO, input_buf, sizeof(char) * COMMAND_INPUT_BUF_SIZE);
-      if (input_length < 0) {
+      char command;
+      if (read(STDIN_FILENO, &command, sizeof(char)) < 0) {
         int error_number = errno;
         print_error("Failed to read from stdin. cause: '%s'\n",
                     strerror(error_number));
 
         return EXIT_FAILURE;
       }
-
-      if (parse_command(input_buf, &window_manager) != EXIT_SUCCESS) {
-        print_error("Something went wrong while processing command.");
+      while (getchar() != '\n') {
       }
 
-      // write(socket_fd, inputBuf, inputLength);
+      socket_context.command = command;
 
-      printf("\n> ");
-      fflush(stdout);
+      if (parse_command(command, &window_manager, socket_fd, socket_context) !=
+          EXIT_SUCCESS) {
+        print_error("Something went wrong while processing command.");
+      }
     }
 
-    // if (FD_ISSET(socket_fd, &mask)) {
-    //   // bzero(buf, sizeof(char) * BUF_SIZE);
-    //   // msgLength = read(socket_fd, buf, BUF_SIZE);
-    //   // // "Quit" command received
-    //   // if (strcmp(buf, "Q\n") == 0 || msgLength == 0) break;
-    //   // // Print the received message (fd=1 means standard output)
-    //   // write(1, buf, msgLength);
-    // }
+    if (FD_ISSET(socket_fd, &mask)) {
+      if (recv(socket_fd, &socket_context, sizeof(SocketContext_t), 0) < 0) {
+        int error_number = errno;
+        print_error(
+            "Failed to receive socket context from server. cause: '%s'\n",
+            strerror(error_number));
+
+        return EXIT_FAILURE;
+      }
+
+      if (rerender_event_handler(&window_manager, &socket_context) !=
+          EXIT_SUCCESS) {
+        print_error("Failed to rerender window.");
+      }
+    }
   }
 
   close_socket(socket_fd);
