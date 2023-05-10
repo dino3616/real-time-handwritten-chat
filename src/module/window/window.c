@@ -18,8 +18,9 @@ WindowManager_t create_window(int x, int y, int width, int height, char *title,
       XCreateSimpleWindow(display, RootWindow(display, 0), x, y, width, height,
                           0, BlackPixel(display, 0), WhitePixel(display, 0));
   XStoreName(display, window, title);
-  XSelectInput(display, window,
-               ExposureMask | ButtonPressMask | ButtonMotionMask);
+  XSelectInput(
+      display, window,
+      ExposureMask | ButtonPressMask | ButtonReleaseMask | ButtonMotionMask);
 
   GC gc = XCreateGC(display, window, None, NULL);
   XSetForeground(display, gc, 0);
