@@ -2,7 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "app/app.h"
+#include "app/client.h"
+#include "app/server.h"
 #include "module/error/error.h"
 
 int main(int argc, char *argv[]) {
