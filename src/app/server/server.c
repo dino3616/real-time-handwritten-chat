@@ -1,4 +1,4 @@
-#include "app/server.h"
+#include "app/server/server.h"
 
 #include <errno.h>
 #include <netdb.h>
@@ -13,32 +13,30 @@
 #include <unistd.h>
 
 #include "app/app.h"
-#include "module/context/context.h"
-#include "module/error/error.h"
-#include "module/socket/socket.h"
+#include "core/context/context.h"
+#include "core/log/log.h"
+#include "module/infra/socket/socket.h"
 
 int launch_server() {
   char host_name[HOST_NAME_SIZE];
   if (gethostname(host_name, sizeof(host_name)) < 0) {
     int error_number = errno;
-    print_error("Failed to get host name. cause: '%s'\n",
-                strerror(error_number));
+    log_error("Failed to get host name. cause: '%s'", strerror(error_number));
 
     return EXIT_FAILURE;
   }
   printf("Your host name is '%s'\n", host_name);
   if (setenv("HOST_NAME", host_name, 1) != EXIT_SUCCESS) {
     int error_number = errno;
-    print_error(
-        "Failed to set host name in environment variable. cause: '%s'\n",
-        strerror(error_number));
+    log_error("Failed to set host name in environment variable. cause: '%s'",
+              strerror(error_number));
 
     return EXIT_FAILURE;
   }
 
   int socket_fd;
   if (listen_with_socket(host_name, PORT, &socket_fd) == NULL) {
-    print_error("Failed to listen with socket.");
+    log_error("Failed to listen with socket.");
 
     return EXIT_FAILURE;
   }
@@ -47,12 +45,10 @@ int launch_server() {
   int client_fds[CLIENT_MAX];
   bzero(client_fds, sizeof(int) * CLIENT_MAX);
 
-  struct timeval timeout;
-  timeout.tv_sec = 0;
-  timeout.tv_usec = 1;
+  struct timeval timeout = {.tv_sec = 0, .tv_usec = 1};
 
-  PointHistory_t all_point_histories[256];
-  bzero(all_point_histories, sizeof(PointHistory_t) * 256);
+  PaintHistory_t all_paint_histories[PAINT_HISTORY_SIZE];
+  bzero(all_paint_histories, sizeof(PaintHistory_t) * PAINT_HISTORY_SIZE);
 
   while (true) {
     fd_set mask;
@@ -73,8 +69,8 @@ int launch_server() {
     int result = select(fd_max + 1, &mask, NULL, NULL, &timeout);
     if (result < 0) {
       int error_number = errno;
-      print_error("Failed to observe file descriptors. cause: '%s'\n",
-                  strerror(error_number));
+      log_error("Failed to observe file descriptors. cause: '%s'",
+                strerror(error_number));
 
       return EXIT_FAILURE;
     }
@@ -83,8 +79,8 @@ int launch_server() {
       char command;
       if (read(STDIN_FILENO, &command, sizeof(char)) < 0) {
         int error_number = errno;
-        print_error("Failed to read from stdin. cause: '%s'\n",
-                    strerror(error_number));
+        log_error("Failed to read from stdin. cause: '%s'",
+                  strerror(error_number));
 
         return EXIT_FAILURE;
       }
@@ -102,8 +98,8 @@ int launch_server() {
       int new_client_fd = accept(socket_fd, NULL, NULL);
       if (new_client_fd < 0) {
         int error_number = errno;
-        print_error("Failed to accept new client. cause: '%s'\n",
-                    strerror(error_number));
+        log_error("Failed to accept new client. cause: '%s'",
+                  strerror(error_number));
 
         return EXIT_FAILURE;
       }
@@ -130,14 +126,14 @@ int launch_server() {
         if (recv(client_fds[i], &socket_context, sizeof(SocketContext_t), 0) <
             0) {
           int error_number = errno;
-          print_error(
-              "Failed to receive socket context from client[%d]. cause: '%s'\n",
+          log_error(
+              "Failed to receive socket context from client[%d]. cause: '%s'",
               i, strerror(error_number));
 
           return EXIT_FAILURE;
         }
 
-        switch (socket_context.command) {
+        switch (socket_context.command_context.command) {
           case 'q': {
             close(client_fds[i]);
             client_fds[i] = 0;
@@ -152,24 +148,24 @@ int launch_server() {
         switch (socket_context.event_context.event_type) {
           case PAINTED_EVENT: {
             for (int j = 0; j < 256; j++) {
-              if (all_point_histories[j].start_point.x == 0 &&
-                  all_point_histories[j].start_point.y == 0 &&
-                  all_point_histories[j].end_point.x == 0 &&
-                  all_point_histories[j].end_point.y == 0) {
+              if (all_paint_histories[j].start_point.x == 0 &&
+                  all_paint_histories[j].start_point.y == 0 &&
+                  all_paint_histories[j].end_point.x == 0 &&
+                  all_paint_histories[j].end_point.y == 0) {
                 for (int k = 0; k < 256; j++, k++) {
-                  if (socket_context.event_context.additional_point_histories[k]
+                  if (socket_context.event_context.additional_paint_histories[k]
                               .start_point.x == 0 &&
-                      socket_context.event_context.additional_point_histories[k]
+                      socket_context.event_context.additional_paint_histories[k]
                               .start_point.y == 0 &&
-                      socket_context.event_context.additional_point_histories[k]
+                      socket_context.event_context.additional_paint_histories[k]
                               .end_point.x == 0 &&
-                      socket_context.event_context.additional_point_histories[k]
+                      socket_context.event_context.additional_paint_histories[k]
                               .end_point.y == 0) {
                     break;
                   }
 
-                  all_point_histories[j] = socket_context.event_context
-                                               .additional_point_histories[k];
+                  all_paint_histories[j] = socket_context.event_context
+                                               .additional_paint_histories[k];
                 }
 
                 break;
@@ -184,8 +180,8 @@ int launch_server() {
               if (send(client_fds[j], &socket_context, sizeof(SocketContext_t),
                        0) < 0) {
                 int error_number = errno;
-                print_error("Failed to send socket context. cause: '%s'\n",
-                            strerror(error_number));
+                log_error("Failed to send socket context. cause: '%s'",
+                          strerror(error_number));
 
                 return EXIT_FAILURE;
               }
@@ -194,8 +190,8 @@ int launch_server() {
             break;
           }
           case EXPOSE_EVENT: {
-            memcpy(socket_context.event_context.all_point_histories,
-                   all_point_histories, sizeof(PointHistory_t) * 256);
+            memcpy(socket_context.event_context.all_paint_histories,
+                   all_paint_histories, sizeof(PaintHistory_t) * 256);
 
             send(client_fds[i], &socket_context, sizeof(SocketContext_t), 0);
 

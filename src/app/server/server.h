@@ -1,5 +1,5 @@
-#ifndef APP_SERVER_H
-#define APP_SERVER_H
+#ifndef APP_SERVER_SERVER_H
+#define APP_SERVER_SERVER_H
 
 #define CLIENT_MAX 10
 
