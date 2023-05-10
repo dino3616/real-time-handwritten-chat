@@ -26,7 +26,7 @@ typedef struct PaintHistory {
 typedef struct EventContext {
   int event_type;
   PaintHistory_t all_paint_histories[PAINT_HISTORY_SIZE];
-  PaintHistory_t additional_paint_histories[PAINT_HISTORY_SIZE];
+  PaintHistory_t additional_paint_history;
 } EventContext_t;
 
 typedef struct SocketContext {

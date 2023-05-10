@@ -171,26 +171,13 @@ int launch_server() {
 
         switch (socket_context.event_context.event_type) {
           case PAINTED_EVENT: {
-            for (int j = 0; j < 256; j++) {
+            for (int j = 0; j < PAINT_HISTORY_SIZE; j++) {
               if (all_paint_histories[j].start_point.x == 0 &&
                   all_paint_histories[j].start_point.y == 0 &&
                   all_paint_histories[j].end_point.x == 0 &&
                   all_paint_histories[j].end_point.y == 0) {
-                for (int k = 0; k < 256; j++, k++) {
-                  if (socket_context.event_context.additional_paint_histories[k]
-                              .start_point.x == 0 &&
-                      socket_context.event_context.additional_paint_histories[k]
-                              .start_point.y == 0 &&
-                      socket_context.event_context.additional_paint_histories[k]
-                              .end_point.x == 0 &&
-                      socket_context.event_context.additional_paint_histories[k]
-                              .end_point.y == 0) {
-                    break;
-                  }
-
-                  all_paint_histories[j] = socket_context.event_context
-                                               .additional_paint_histories[k];
-                }
+                all_paint_histories[j] =
+                    socket_context.event_context.additional_paint_history;
 
                 break;
               }
@@ -215,9 +202,17 @@ int launch_server() {
           }
           case EXPOSE_EVENT: {
             memcpy(socket_context.event_context.all_paint_histories,
-                   all_paint_histories, sizeof(PaintHistory_t) * 256);
+                   all_paint_histories,
+                   sizeof(PaintHistory_t) * PAINT_HISTORY_SIZE);
 
-            send(client_fds[i], &socket_context, sizeof(SocketContext_t), 0);
+            if (send(client_fds[i], &socket_context, sizeof(SocketContext_t),
+                     0) < 0) {
+              int error_number = errno;
+              log_error("Failed to send socket context. cause: '%s'",
+                        strerror(error_number));
+
+              return EXIT_FAILURE;
+            }
 
             break;
           }
