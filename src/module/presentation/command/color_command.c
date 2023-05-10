@@ -11,7 +11,7 @@
 #include "module/presentation/window/window.h"
 
 int color_command(WindowManager_t *window_manager) {
-  char color_hex[8];
+  char color_hex[7];
   printf("Enter color in hex format (e.g. ff0000).\n");
   printf("[color cmd] > ");
   fflush(stdout);
