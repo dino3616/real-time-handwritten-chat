@@ -1,8 +1,8 @@
-#ifndef MODULE_EVENT_EVENT_H
-#define MODULE_EVENT_EVENT_H
+#ifndef MODULE_PRESENTATION_WINDOW_EVENT_H
+#define MODULE_PRESENTATION_WINDOW_EVENT_H
 
-#include "module/context/context.h"
-#include "module/window/window.h"
+#include "core/context/context.h"
+#include "module/presentation/window/window.h"
 
 extern int render_event_handler(WindowManager_t *window_manager, int socket_fd,
                                 SocketContext_t *socket_context);

@@ -1,12 +1,8 @@
-#include "module/window/window.h"
+#include "module/presentation/window/window.h"
 
 #include <X11/X.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-#include <stdio.h>
-
-#include "module/error/error.h"
-#include "module/util/color.h"
 
 Display_t *open_display() { return XOpenDisplay(NULL); }
 
