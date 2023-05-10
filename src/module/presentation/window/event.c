@@ -12,6 +12,7 @@
 
 #include "core/context/context.h"
 #include "core/log/log.h"
+#include "module/presentation/window/color.h"
 #include "module/presentation/window/window.h"
 
 int render_event_handler(WindowManager_t *window_manager, int socket_fd,
@@ -72,6 +73,7 @@ int render_event_handler(WindowManager_t *window_manager, int socket_fd,
             paint_histories[i].start_point.y == 0 &&
             paint_histories[i].end_point.x == 0 &&
             paint_histories[i].end_point.y == 0) {
+          paint_histories[i].rgb_color = window_manager->foreground_rgb_color;
           paint_histories[i].start_point.x = startPoint.x;
           paint_histories[i].start_point.y = startPoint.y;
           paint_histories[i].end_point.x = event.xmotion.x;
@@ -95,6 +97,8 @@ int rerender_event_handler(WindowManager_t *window_manager,
                            SocketContext_t *socket_context) {
   switch (socket_context->event_context.event_type) {
     case PAINTED_EVENT: {
+      RGBColor_t own_rgb_color = window_manager->foreground_rgb_color;
+
       for (int i = 0; i < PAINT_HISTORY_SIZE; i++) {
         if (socket_context->event_context.additional_paint_histories[i]
                     .start_point.x == 0 &&
@@ -106,6 +110,11 @@ int rerender_event_handler(WindowManager_t *window_manager,
                     .end_point.y == 0) {
           break;
         }
+
+        change_foreground_color(
+            &socket_context->event_context.additional_paint_histories[i]
+                 .rgb_color,
+            window_manager);
 
         XDrawLine(window_manager->display, window_manager->window,
                   window_manager->gc,
@@ -119,9 +128,13 @@ int rerender_event_handler(WindowManager_t *window_manager,
                       .end_point.y);
       }
 
+      change_foreground_color(&own_rgb_color, window_manager);
+
       break;
     }
     case EXPOSE_EVENT: {
+      RGBColor_t own_rgb_color = window_manager->foreground_rgb_color;
+
       for (int i = 0; i < PAINT_HISTORY_SIZE; i++) {
         if (socket_context->event_context.all_paint_histories[i]
                     .start_point.x == 0 &&
@@ -134,6 +147,10 @@ int rerender_event_handler(WindowManager_t *window_manager,
           break;
         }
 
+        change_foreground_color(
+            &socket_context->event_context.all_paint_histories[i].rgb_color,
+            window_manager);
+
         XDrawLine(
             window_manager->display, window_manager->window, window_manager->gc,
             socket_context->event_context.all_paint_histories[i].start_point.x,
@@ -141,6 +158,8 @@ int rerender_event_handler(WindowManager_t *window_manager,
             socket_context->event_context.all_paint_histories[i].end_point.x,
             socket_context->event_context.all_paint_histories[i].end_point.y);
       }
+
+      change_foreground_color(&own_rgb_color, window_manager);
 
       break;
     }
