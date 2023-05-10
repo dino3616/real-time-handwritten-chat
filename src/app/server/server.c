@@ -50,7 +50,7 @@ int launch_server() {
     return EXIT_FAILURE;
   }
   int client_fds_length = CLIENT_FDS_ALLOCATION_CHUNK;
-  int client_count = 0;
+  int client_fd_count = 0;
 
   struct timeval timeout = {.tv_sec = 0, .tv_usec = 1};
 
@@ -114,11 +114,11 @@ int launch_server() {
       for (int i = 0; i < client_fds_length; i++) {
         if (client_fds[i] == 0) {
           client_fds[i] = new_client_fd;
-          client_count++;
+          client_fd_count++;
 
           log_info("client[%d] created.", i);
 
-          if (client_count == client_fds_length) {
+          if (client_fd_count == client_fds_length) {
             int *new_client_fds = (int *)realloc(
                 client_fds, (client_fds_length + CLIENT_FDS_ALLOCATION_CHUNK) *
                                 sizeof(int));
@@ -161,7 +161,7 @@ int launch_server() {
           case 'q': {
             close(client_fds[i]);
             client_fds[i] = 0;
-            client_count--;
+            client_fd_count--;
 
             log_info("client[%d] destroyed.", i);
 
