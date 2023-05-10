@@ -22,8 +22,13 @@
 #include "module/presentation/window/window.h"
 
 int launch_client() {
-  WindowManager_t window_manager = create_window(
-      500, 200, 600, 400, "real-time-handwritten-chat", open_display());
+  WindowManager_t window_manager;
+  if (create_window(500, 200, 600, 400, "real-time-handwritten-chat",
+                    open_display(), &window_manager) == NULL) {
+    log_error("Failed to create window.");
+
+    return EXIT_FAILURE;
+  }
 
   char* host_name = getenv("HOST_NAME");
   if (host_name == NULL) {

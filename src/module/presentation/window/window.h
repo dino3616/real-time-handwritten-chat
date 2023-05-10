@@ -19,8 +19,8 @@ typedef struct WindowManager {
 extern Display_t *open_display();
 extern void close_display(Display_t *display);
 
-extern WindowManager_t create_window(int x, int y, int width, int height,
-                                     char *title, Display_t *display);
+extern WindowManager_t *create_window(int x, int y, int width, int height,
+                                     char *title, Display_t *display, WindowManager_t *window_manager);
 extern void destroy_window(WindowManager_t *window_manager);
 
 #endif
