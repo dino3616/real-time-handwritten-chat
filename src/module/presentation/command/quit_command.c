@@ -1,11 +1,11 @@
-#include "module/command/quit_command.h"
+#include "module/presentation/command/quit_command.h"
 
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "module/error/error.h"
+#include "core/log/log.h"
 
 int quit_command() {
   printf("Bye-bye :)\n");
@@ -13,8 +13,7 @@ int quit_command() {
   exit(EXIT_SUCCESS);
 
   int error_number = errno;
-  print_error("Failed to exit the program. cause: '%s'\n",
-              strerror(error_number));
+  log_error("Failed to exit the program. cause: '%s'", strerror(error_number));
 
   return EXIT_FAILURE;
 }

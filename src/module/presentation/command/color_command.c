@@ -1,14 +1,14 @@
-#include "module/command/color_command.h"
+#include "module/presentation/command/color_command.h"
 
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "module/error/error.h"
-#include "module/util/color.h"
-#include "module/window/color.h"
-#include "module/window/window.h"
+#include "core/log/log.h"
+#include "core/util/color.h"
+#include "module/presentation/window/color.h"
+#include "module/presentation/window/window.h"
 
 int color_command(WindowManager_t *window_manager) {
   char color_hex[8];
@@ -17,8 +17,8 @@ int color_command(WindowManager_t *window_manager) {
   fflush(stdout);
   if (fgets(color_hex, sizeof(color_hex), stdin) == NULL) {
     int error_number = errno;
-    print_error("Failed to read color input. cause: '%s'\n",
-                strerror(error_number));
+    log_error("Failed to read color input. cause: '%s'",
+              strerror(error_number));
 
     return EXIT_FAILURE;
   }
@@ -29,12 +29,16 @@ int color_command(WindowManager_t *window_manager) {
   RGBColor_t rgb_color;
   unsigned long pixel;
   if (parse_color(color_hex, &rgb_color, &pixel) == NULL) {
-    print_error("Failed to parse color.");
+    log_error("Failed to parse color.");
 
     return EXIT_FAILURE;
   }
 
-  change_foreground_color(&rgb_color, window_manager);
+  if (change_foreground_color(&rgb_color, window_manager) != EXIT_SUCCESS) {
+    log_error("Failed to change the pen color.");
+
+    return EXIT_FAILURE;
+  }
 
   printf("\33[38;2;%d;%d;%dm", rgb_color.r, rgb_color.g, rgb_color.b);
   printf("Successfully set the pen color to #%s.\n", color_hex);

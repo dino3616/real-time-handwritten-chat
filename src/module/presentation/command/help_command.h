@@ -1,0 +1,6 @@
+#ifndef MODULE_PRESENTATION_COMMAND_HELP_COMMAND_H
+#define MODULE_PRESENTATION_COMMAND_HELP_COMMAND_H
+
+extern int help_command();
+
+#endif
