@@ -1,6 +1,8 @@
 #ifndef CORE_CONTEXT_CONTEXT_H
 #define CORE_CONTEXT_CONTEXT_H
 
+#include "core/util/color.h"
+
 #define PAINTED_EVENT 1
 #define EXPOSE_EVENT 2
 
@@ -16,6 +18,7 @@ typedef struct Point {
 } Point_t;
 
 typedef struct PaintHistory {
+  RGBColor_t rgb_color;
   Point_t start_point;
   Point_t end_point;
 } PaintHistory_t;
