@@ -73,8 +73,7 @@ int launch_server() {
       }
     }
 
-    int result = select(fd_max + 1, &mask, NULL, NULL, &timeout);
-    if (result < 0) {
+    if (select(fd_max + 1, &mask, NULL, NULL, &timeout) < 0) {
       int error_number = errno;
       log_error("Failed to observe file descriptors. cause: '%s'",
                 strerror(error_number));

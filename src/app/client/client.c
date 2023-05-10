@@ -84,8 +84,7 @@ int launch_client() {
 
     render_event_handler(&window_manager, socket_fd, &socket_context);
 
-    int result = select(socket_fd + 1, &mask, NULL, NULL, &timeout);
-    if (result < 0) {
+    if (select(socket_fd + 1, &mask, NULL, NULL, &timeout) < 0) {
       int error_number = errno;
       log_error("Failed to observe file descriptors. cause: '%s'",
                 strerror(error_number));
