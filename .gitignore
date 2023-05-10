@@ -39,3 +39,6 @@ coverage/
 # vercel
 .vercel/
 .turbo/
+
+# report
+report/
