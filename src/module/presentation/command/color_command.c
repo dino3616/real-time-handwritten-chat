@@ -39,6 +39,7 @@ int color_command(WindowManager_t *window_manager) {
 
     return EXIT_FAILURE;
   }
+  window_manager->foreground_rgb_color = rgb_color;
 
   printf("\33[38;2;%d;%d;%dm", rgb_color.r, rgb_color.g, rgb_color.b);
   printf("Successfully set the pen color to #%s.\n", color_hex);
