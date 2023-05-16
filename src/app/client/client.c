@@ -106,7 +106,7 @@ int launch_client() {
 
       socket_context.command_context.command = command;
 
-      if (parse_command(command, &window_manager, socket_fd, socket_context) !=
+      if (parse_command(command, &window_manager, socket_fd, &socket_context) !=
           EXIT_SUCCESS) {
         log_error("Something went wrong while processing command.");
       }

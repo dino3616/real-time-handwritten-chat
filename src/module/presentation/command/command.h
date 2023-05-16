@@ -5,6 +5,6 @@
 #include "module/presentation/window/window.h"
 
 extern int parse_command(char command, WindowManager_t *window_manager,
-                         int socket_fd, SocketContext_t socket_context);
+                         int socket_fd, SocketContext_t *socket_context);
 
 #endif
