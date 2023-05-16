@@ -37,19 +37,6 @@ int render_event_handler(WindowManager_t *window_manager, int socket_fd,
 
       break;
     }
-    case Expose: {
-      socket_context->event_context.event_type = EXPOSE_EVENT;
-
-      if (send(socket_fd, socket_context, sizeof(SocketContext_t), 0) < 0) {
-        int error_number = errno;
-        log_error("Failed to send socket context. cause: '%s'",
-                  strerror(error_number));
-
-        return EXIT_FAILURE;
-      }
-
-      break;
-    }
     case MotionNotify: {
       XDrawLine(window_manager->display, window_manager->window,
                 window_manager->gc, startPoint.x, startPoint.y, event.xmotion.x,
@@ -67,6 +54,7 @@ int render_event_handler(WindowManager_t *window_manager, int socket_fd,
       socket_context->event_context.event_type = PAINTED_EVENT;
       socket_context->event_context.additional_paint_history = paint_history;
 
+      socket_context->request_method = POST_REQUEST_METHOD;
       if (send(socket_fd, socket_context, sizeof(SocketContext_t), 0) < 0) {
         int error_number = errno;
         log_error("Failed to send socket context. cause: '%s'",
@@ -77,6 +65,19 @@ int render_event_handler(WindowManager_t *window_manager, int socket_fd,
 
       bzero(&socket_context->event_context.additional_paint_history,
             sizeof(PaintHistory_t));
+
+      break;
+    }
+    case Expose: {
+      socket_context->request_method = GET_REQUEST_METHOD;
+      socket_context->event_context.event_type = EXPOSE_EVENT;
+      if (send(socket_fd, socket_context, sizeof(SocketContext_t), 0) < 0) {
+        int error_number = errno;
+        log_error("Failed to send socket context. cause: '%s'",
+                  strerror(error_number));
+
+        return EXIT_FAILURE;
+      }
 
       break;
     }

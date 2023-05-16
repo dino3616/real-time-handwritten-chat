@@ -54,6 +54,9 @@ int launch_server() {
 
   struct timeval timeout = {.tv_sec = 0, .tv_usec = 1};
 
+  MessageHistory_t all_message_histories[MESSAGE_HISTORY_SIZE];
+  bzero(all_message_histories, sizeof(MessageHistory_t) * MESSAGE_HISTORY_SIZE);
+
   PaintHistory_t all_paint_histories[PAINT_HISTORY_SIZE];
   bzero(all_paint_histories, sizeof(PaintHistory_t) * PAINT_HISTORY_SIZE);
 
@@ -157,6 +160,64 @@ int launch_server() {
         }
 
         switch (socket_context.command_context.command) {
+          case 'm': {
+            switch (socket_context.request_method) {
+              case GET_REQUEST_METHOD: {
+                memcpy(socket_context.command_context.message_context
+                           .all_message_histories,
+                       all_message_histories,
+                       sizeof(MessageHistory_t) * MESSAGE_HISTORY_SIZE);
+                if (send(client_fds[i], &socket_context,
+                         sizeof(SocketContext_t), 0) < 0) {
+                  int error_number = errno;
+                  log_error("Failed to send socket context. cause: '%s'",
+                            strerror(error_number));
+
+                  return EXIT_FAILURE;
+                }
+
+                break;
+              }
+              case POST_REQUEST_METHOD: {
+                for (int j = 0; j < MESSAGE_HISTORY_SIZE; j++) {
+                  if (strlen(all_message_histories[j].message) == 0) {
+                    all_message_histories[j].client_id = i;
+                    strcpy(all_message_histories[j].message,
+                           socket_context.command_context.message_context
+                               .additional_message_history.message);
+                    all_message_histories[j].rgb_color =
+                        socket_context.command_context.message_context
+                            .additional_message_history.rgb_color;
+
+                    break;
+                  }
+                }
+
+                memcpy(socket_context.command_context.message_context
+                           .all_message_histories,
+                       all_message_histories,
+                       sizeof(MessageHistory_t) * MESSAGE_HISTORY_SIZE);
+                for (int j = 0; j < client_fds_length; j++) {
+                  if (j == i || client_fds[j] == 0) {
+                    continue;
+                  }
+
+                  if (send(client_fds[j], &socket_context,
+                           sizeof(SocketContext_t), 0) < 0) {
+                    int error_number = errno;
+                    log_error("Failed to send socket context. cause: '%s'",
+                              strerror(error_number));
+
+                    return EXIT_FAILURE;
+                  }
+                }
+
+                break;
+              }
+            }
+
+            break;
+          }
           case 'q': {
             close(client_fds[i]);
             client_fds[i] = 0;
@@ -187,6 +248,7 @@ int launch_server() {
                 continue;
               }
 
+              socket_context.event_context.event_type = PAINTED_EVENT;
               if (send(client_fds[j], &socket_context, sizeof(SocketContext_t),
                        0) < 0) {
                 int error_number = errno;
@@ -200,6 +262,7 @@ int launch_server() {
             break;
           }
           case EXPOSE_EVENT: {
+            socket_context.event_context.event_type = EXPOSE_EVENT;
             memcpy(socket_context.event_context.all_paint_histories,
                    all_paint_histories,
                    sizeof(PaintHistory_t) * PAINT_HISTORY_SIZE);
