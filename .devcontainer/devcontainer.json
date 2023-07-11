@@ -21,7 +21,6 @@
         "pkief.material-icon-theme",
         "christian-kohler.path-intellisense",
         "esbenp.prettier-vscode",
-        "tabnine.tabnine-vscode",
         "hbenl.vscode-test-explorer",
         "gruntfuggly.todo-tree"
       ]

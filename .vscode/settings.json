@@ -114,14 +114,15 @@
       "name": "scope",
       "type": "text",
       "description": "Scope of changes.",
-      "prefix": "(",
+      "prefix": " (",
       "suffix": ")"
     },
     {
       "label": "Short Description",
       "name": "description",
       "type": "text",
-      "description": "Commit summary."
+      "description": "Commit summary.",
+      "prefix": " "
     },
     {
       "label": "Body",
@@ -140,14 +141,22 @@
       "multiline": true
     }
   ],
-  "commit-message-editor.view.defaultView": "form",
   "commit-message-editor.dynamicTemplate": [
-    "{type} {scope} {description}",
+    "{type}{scope}{description}",
     "",
     "{body}",
     "",
     "{footer}"
   ],
+  "commit-message-editor.staticTemplate": [
+    "label: emoji (scope) short-description",
+    "",
+    "body",
+    "",
+    "footer"
+  ],
+  "commit-message-editor.view.defaultView": "form",
+  "C_Cpp.clang_format_style": "Google",
   "C_Cpp.vcFormat.space.pointerReferenceAlignment": "right",
   "editor.codeActionsOnSave": {
     "source.fixAll": true
@@ -156,6 +165,7 @@
   "editor.formatOnSave": true,
   "files.encoding": "utf8",
   "files.eol": "\n",
+  "workbench.iconTheme": "material-icon-theme",
   "[c]": {
     "editor.defaultFormatter": "ms-vscode.cpptools"
   },
