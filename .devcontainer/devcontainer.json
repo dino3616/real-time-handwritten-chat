@@ -32,5 +32,11 @@
       "webPort": "6080",
       "vncPort": "5901"
     }
+  },
+  "forwardPorts": [6080],
+  "portsAttributes": {
+    "6080": {
+      "label": "noVNC"
+    }
   }
 }
